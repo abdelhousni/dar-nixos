@@ -14,6 +14,7 @@ A deliberately small NixOS machine, described in one file. It's the companion re
 | [`test.nix`](test.nix) | A NixOS VM test that boots `configuration.nix` and checks what the TILs claim about it. |
 | [`.github/workflows/check.yml`](.github/workflows/check.yml) | Runs both on GitHub Actions, on every push. |
 | [`.gitlab-ci.yml`](.gitlab-ci.yml) | The same two jobs for a self-managed GitLab CE runner. |
+| [`proxmox/`](proxmox) | The same machine on Proxmox: OpenTofu creates a skeleton VM, nixos-anywhere installs NixOS from a flake, sops-nix brings the secrets. A flake of its own; see its README. |
 
 It targets **NixOS 26.05** and uses plain `configuration.nix` with channels, not flakes, to match the TIL.
 
@@ -86,4 +87,4 @@ Only do this on a test machine. It replaces your configuration.
 
 ## Not here on purpose
 
-Flakes, home-manager, secrets and multiple hosts are left out. Each one is worth learning, but only after the basic loop is familiar: edit, rebuild, and roll back.
+At the root, flakes, home-manager, secrets and multiple hosts are left out; `proxmox/` adds a flake and secrets on top of the same configuration. Each one is worth learning, but only after the basic loop is familiar: edit, rebuild, and roll back.

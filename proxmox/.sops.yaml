@@ -1,0 +1,13 @@
+# Who can decrypt what. sops reads this when it creates a file and when you run
+# `sops updatekeys`. Recipients are age public keys; a host's comes from its
+# SSH host key (scripts/new-host-key.sh derives it with ssh-to-age and adds it).
+#
+# The first recipient is the CI test host key. Its PRIVATE half is committed in
+# ci/test-host-key, so anything encrypted to it is effectively public: only the
+# dummy secrets/demo.yaml uses it. Add your own admin key (age-keygen -y) so you
+# can edit secrets, and give real secrets a file of their own.
+creation_rules:
+  - path_regex: secrets/demo\.yaml$
+    key_groups:
+      - age:
+          - age1477u45nqynwcduquexjt0njlppdu79lanl6wf8h2a0n4cvmphfhs2xanrn

@@ -1,0 +1,7 @@
+# Copy to terraform.tfvars and adjust. No secrets here: the Proxmox API token
+# goes in PROXMOX_VE_API_TOKEN, the state passphrase in TF_VAR_state_passphrase.
+node_name                = "pve"
+ipv4_cidr                = "192.168.1.50/24"
+ipv4_gateway             = "192.168.1.1"
+bootstrap_ssh_public_key = "ssh-ed25519 AAAA... you@laptop"
+# proxmox_insecure       = true   # self-signed Proxmox certificate
