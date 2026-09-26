@@ -9,7 +9,23 @@ permissions:
   contents: read
 
 jobs:
+  # Evaluation only: no build, no VM, no KVM. Fails fast on assertion errors
+  # and on the /etc/zshrc properties the TIL describes.
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          nix_path: nixpkgs=channel:nixos-26.05
+          enable_kvm: false
+      - run: ./ci/eval-checks.sh
+
+  # Boots the machine in QEMU and runs test.nix inside it. GitHub-hosted Linux
+  # runners expose /dev/kvm; enable_kvm adds a udev rule making it usable by
+  # the Nix build users, and Nix then advertises the `kvm` system feature.
   vm-test:
+    needs: eval
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -17,7 +33,7 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-26.05
           enable_kvm: true
-      - name: Evaluate the VM
-        run: nix-instantiate '<nixpkgs/nixos>' -A vm -I nixos-config=./configuration.nix
+      - name: Show the Nix features this runner offers
+        run: nix --extra-experimental-features nix-command config show system-features
       - name: Boot it and run the checks
         run: nix-build test.nix

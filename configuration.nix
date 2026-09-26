@@ -12,9 +12,10 @@
   # installer, specific to one machine, so it isn't committed here. The VM
   # build doesn't need it; it brings its own virtual disk.
   imports =
-    if builtins.pathExists ./hardware-configuration.nix
-    then [ ./hardware-configuration.nix ]
-    else [ ];
+    [ ./zsh.nix ] # Zsh + Oh My Zsh, see zsh.nix
+    ++ (if builtins.pathExists ./hardware-configuration.nix
+        then [ ./hardware-configuration.nix ]
+        else [ ]);
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;

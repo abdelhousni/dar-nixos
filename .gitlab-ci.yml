@@ -1,0 +1,30 @@
+# The same two checks as .github/workflows/check.yml, for a self-managed
+# GitLab CE instance with a Docker-executor runner.
+#
+# - eval runs on any runner: no build, no VM, no KVM.
+# - vm-test needs a runner that passes /dev/kvm into the job container, and
+#   is tagged `kvm` so it only lands there. See README.md for the runner side.
+
+default:
+  # The official image. Its bundled channel is nixpkgs-unstable, so NIX_PATH
+  # below pins the release this repo targets instead.
+  image: nixos/nix:2.34.8
+
+variables:
+  NIX_PATH: "nixpkgs=channel:nixos-26.05"
+
+stages: [eval, test]
+
+eval:
+  stage: eval
+  script:
+    - ./ci/eval-checks.sh
+
+vm-test:
+  stage: test
+  tags: [kvm]
+  script:
+    # Fail early with a clear message instead of in the middle of the build.
+    - test -e /dev/kvm || { echo "No /dev/kvm in this job container; see README.md"; exit 1; }
+    - nix --extra-experimental-features nix-command config show system-features
+    - nix-build test.nix
