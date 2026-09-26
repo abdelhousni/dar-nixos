@@ -1,12 +1,19 @@
 # dar-nixos
 
-A deliberately small NixOS machine, described in one file. It's the companion repo for the TIL [First steps on NixOS: the whole system is one file, and every change is a boot entry](https://abdelhousni.github.io/til/nixos/first-steps-configuration-generations-rollback.html).
+A deliberately small NixOS machine, described in one file. It's the companion repo for these TIL entries:
+
+- [First steps on NixOS: the whole system is one file, and every change is a boot entry](https://abdelhousni.github.io/til/nixos/first-steps-configuration-generations-rollback.html)
+- [Oh My Zsh on NixOS: the plugin list installs nothing, and NixOS aliases win](https://abdelhousni.github.io/til/nixos/zsh-oh-my-zsh-declarative.html)
+- [Testing a NixOS configuration on GitHub Actions](https://abdelhousni.github.io/til/nixos/nixos-config-tests-github-actions.html) and [on self-managed GitLab CE](https://abdelhousni.github.io/til/nixos/nixos-config-tests-gitlab-ce.html)
 
 | File | What it is |
 |---|---|
 | [`configuration.nix`](configuration.nix) | The whole machine: hostname, packages, SSH, a user, weekly garbage collection, `stateVersion`. Commented line by line. |
-| [`test.nix`](test.nix) | A NixOS VM test that boots `configuration.nix` and checks what the TIL claims about it. |
-| [`.github/workflows/check.yml`](.github/workflows/check.yml) | Runs that test on every push. |
+| [`zsh.nix`](zsh.nix) | Zsh with Oh My Zsh, imported by `configuration.nix`. |
+| [`ci/eval-checks.sh`](ci/eval-checks.sh) | Evaluation-only checks: builds nothing, needs no KVM. |
+| [`test.nix`](test.nix) | A NixOS VM test that boots `configuration.nix` and checks what the TILs claim about it. |
+| [`.github/workflows/check.yml`](.github/workflows/check.yml) | Runs both on GitHub Actions, on every push. |
+| [`.gitlab-ci.yml`](.gitlab-ci.yml) | The same two jobs for a self-managed GitLab CE runner. |
 
 It targets **NixOS 26.05** and uses plain `configuration.nix` with channels, not flakes, to match the TIL.
 
@@ -27,11 +34,21 @@ SSH on the host's port 2222 is forwarded to the VM, but password login is disabl
 
 ## Run the checks
 
+Two levels. The first needs only Nix:
+
+```sh
+NIX_PATH=nixpkgs=channel:nixos-26.05 ./ci/eval-checks.sh
+```
+
+It evaluates the whole system (so NixOS assertions fire) and inspects the generated `/etc/zshrc`: no second `compinit`, a theme set, and the NixOS `gc` alias written after Oh My Zsh.
+
+The second boots the machine in QEMU and needs KVM:
+
 ```sh
 nix-build test.nix -I nixpkgs=channel:nixos-26.05
 ```
 
-This boots the machine in QEMU and asserts that sshd is running on port 22, `git` and `htop` are on the PATH, the hostname is set, the `nix-gc` timer exists, and the running system is a Nix store path. It's fast with KVM and works slowly without it.
+It asserts that sshd is running on port 22, `git` and `htop` are on the PATH, the hostname is set, the `nix-gc` timer exists, the running system is a Nix store path, and, for `zsh.nix`, that zsh is the login shell, `gc` is the NixOS alias, no Oh My Zsh plugin warns at startup, and `compinit` ran once. The test sets `qemu.forceAccel = true`, so without usable KVM it fails with a clear message instead of crawling along in software emulation.
 
 To poke at the VM from a Python REPL instead:
 
@@ -47,7 +64,7 @@ Only do this on a test machine. It replaces your configuration.
 2. Copy the file in next to the `hardware-configuration.nix` the installer generated. `configuration.nix` imports that file automatically when it exists.
 
    ```sh
-   sudo cp configuration.nix /etc/nixos/configuration.nix
+   sudo cp configuration.nix zsh.nix /etc/nixos/
    ```
 3. Apply it without making it the boot default. If anything goes wrong, rebooting undoes it:
 
