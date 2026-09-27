@@ -57,5 +57,46 @@ pkgs.testers.runNixOSTest {
     # compinit ran once, from Oh My Zsh: its dump exists, NixOS's doesn't.
     machine.succeed("ls /home/demo/.zcompdump-dar-nixos-*")
     machine.fail("test -e /home/demo/.zcompdump")
+
+    # home.nix: Home Manager activates as a system unit at boot, as the user,
+    # ordered before logins are allowed.
+    machine.wait_for_unit("home-manager-demo.service")
+    before = machine.succeed("systemctl show -p Before --value home-manager-demo.service")
+    assert "systemd-user-sessions.service" in before, before
+    machine.succeed("systemctl show -p User --value home-manager-demo.service | grep -qx demo")
+
+    # Managed files are symlinks into the Nix store, and git reads them.
+    machine.succeed("readlink -f /home/demo/.config/git/config | grep -q '^/nix/store/'")
+    name = machine.succeed("su -l demo -c 'git config --get user.name'").strip()
+    assert name == "Demo", name
+    machine.succeed("grep -q 'Managed by Home Manager' /home/demo/.config/dar-nixos/hello.txt")
+
+    # useUserPackages: home.packages land in the per-user profile, on PATH.
+    machine.succeed("test -x /etc/profiles/per-user/demo/bin/rg")
+    machine.succeed("su -l demo -c 'command -v rg' | grep -q '^/etc/profiles/per-user/demo/'")
+    machine.fail("test -e /home/demo/.nix-profile/bin/rg")
+
+    # A file in the way of a managed one: with backupFileExtension set, the
+    # next activation moves it aside instead of failing.
+    hello = "/home/demo/.config/dar-nixos/hello.txt"
+    def put_file_in_the_way():
+        machine.succeed(f"su -l demo -c 'rm {hello} && echo edited by hand > {hello}'")
+    put_file_in_the_way()
+    machine.succeed("systemctl restart home-manager-demo.service")
+    machine.succeed(f"grep -qx 'edited by hand' {hello}.backup")
+    machine.succeed(f"readlink -f {hello} | grep -q '^/nix/store/'")
+
+    # Only once: the next collision would overwrite hello.txt.backup, so
+    # activation fails instead (overwriteBackup = true would allow it).
+    put_file_in_the_way()
+    machine.fail("systemctl restart home-manager-demo.service")
+    journal = machine.succeed("journalctl -u home-manager-demo.service --no-pager")
+    assert "would be clobbered by backing up" in journal, journal
+    machine.succeed(f"grep -qx 'edited by hand' {hello}")
+
+    # Deal with the backup, and activation works again.
+    machine.succeed(f"rm {hello}.backup")
+    machine.succeed("systemctl restart home-manager-demo.service")
+    machine.succeed(f"readlink -f {hello} | grep -q '^/nix/store/'")
   '';
 }

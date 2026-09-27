@@ -1,5 +1,5 @@
-# dar-pve: the dar-nixos machine (../configuration.nix, with zsh.nix) as a
-# Proxmox VM. Only what differs from the repo's base machine lives here.
+# dar-pve: the dar-nixos machine (../configuration.nix, with zsh.nix and
+# home.nix) as a Proxmox VM. Only what differs from the base machine lives here.
 { lib, modulesPath, ... }:
 
 {
