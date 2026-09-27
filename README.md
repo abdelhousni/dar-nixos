@@ -10,6 +10,7 @@ A deliberately small NixOS machine, described in one file. It's the companion re
 |---|---|
 | [`configuration.nix`](configuration.nix) | The whole machine: hostname, packages, SSH, a user, weekly garbage collection, `stateVersion`. Commented line by line. |
 | [`zsh.nix`](zsh.nix) | Zsh with Oh My Zsh, imported by `configuration.nix`. |
+| [`ccbox.nix`](ccbox.nix), [`pkgs/ccbox.nix`](pkgs/ccbox.nix) | [ccbox](https://github.com/guimou/ccbox) (coding agents in a rootless Podman container) for `demo`, packaged from a pinned commit instead of curl-ed into `~/.local/bin`. Imported by `configuration.nix`. |
 | [`ci/eval-checks.sh`](ci/eval-checks.sh) | Evaluation-only checks: builds nothing, needs no KVM. |
 | [`test.nix`](test.nix) | A NixOS VM test that boots `configuration.nix` and checks what the TILs claim about it. |
 | [`.github/workflows/check.yml`](.github/workflows/check.yml) | Runs both on GitHub Actions, on every push. |
@@ -51,7 +52,7 @@ The second boots the machine in QEMU and needs KVM:
 nix-build test.nix -I nixpkgs=channel:nixos-26.05
 ```
 
-It asserts that sshd is running on port 22, `git` and `htop` are on the PATH, the hostname is set, the `nix-gc` timer exists, the running system is a Nix store path, and, for `zsh.nix`, that zsh is the login shell, `gc` is the NixOS alias, no Oh My Zsh plugin warns at startup, and `compinit` ran once. The test sets `qemu.forceAccel = true`, so without usable KVM it fails with a clear message instead of crawling along in software emulation.
+It asserts that sshd is running on port 22, `git` and `htop` are on the PATH, the hostname is set, the `nix-gc` timer exists, the running system is a Nix store path, and, for `zsh.nix`, that zsh is the login shell, `gc` is the NixOS alias, no Oh My Zsh plugin warns at startup, and `compinit` ran once. For `ccbox.nix`, it checks that `ccbox` resolves to `/etc/profiles/per-user/demo/bin`, that its `#!/bin/bash` was rewritten to a store path, that `ccbox --help` finds its shared library through the symlink, and that Podman runs rootless as `demo`. The test sets `qemu.forceAccel = true`, so without usable KVM it fails with a clear message instead of crawling along in software emulation.
 
 To poke at the VM from a Python REPL instead:
 
@@ -67,7 +68,7 @@ Only do this on a test machine. It replaces your configuration.
 2. Copy the file in next to the `hardware-configuration.nix` the installer generated. `configuration.nix` imports that file automatically when it exists.
 
    ```sh
-   sudo cp configuration.nix zsh.nix /etc/nixos/
+   sudo cp -r configuration.nix zsh.nix ccbox.nix pkgs /etc/nixos/
    ```
 3. Apply it without making it the boot default. If anything goes wrong, rebooting undoes it:
 

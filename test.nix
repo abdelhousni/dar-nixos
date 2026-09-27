@@ -57,5 +57,22 @@ pkgs.testers.runNixOSTest {
     # compinit ran once, from Oh My Zsh: its dump exists, NixOS's doesn't.
     machine.succeed("ls /home/demo/.zcompdump-dar-nixos-*")
     machine.fail("test -e /home/demo/.zcompdump")
+
+    # ccbox.nix: the launchers are on demo's PATH through the per-user
+    # profile, with no ~/.local/bin and no PATH edit.
+    where = machine.succeed("su -l demo -c 'command -v ccbox'").strip()
+    assert where == "/etc/profiles/per-user/demo/bin/ccbox", where
+    # Upstream's #!/bin/bash doesn't exist on NixOS; the package rewrote it.
+    machine.succeed("head -1 \"$(readlink -f " + where + ")\" | grep -q '^#!/nix/store/.*/bin/bash$'")
+    # Through the symlink, the launcher still finds lib/box-common.sh.
+    usage = machine.succeed("su -l demo -c 'ccbox --help'")
+    assert "Run Claude Code in a container" in usage, usage
+    machine.succeed("su -l demo -c 'command -v ocbox qcbox cxbox ompbox'")
+
+    # Rootless Podman for demo: a subuid range was allocated, and podman
+    # runs as the user without root.
+    machine.succeed("grep -q '^demo:' /etc/subuid")
+    rootless = machine.succeed("su -l demo -c \"podman info --format '{{.Host.Security.Rootless}}'\"").strip()
+    assert rootless == "true", rootless
   '';
 }
