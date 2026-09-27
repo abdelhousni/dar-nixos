@@ -90,8 +90,8 @@ if [[ -n "${E2E_KEXEC_LOCAL:-}" ]]; then
 fi
 SSH_PORT=2222 SSH_KEY="$work/deploy" \
 NIXOS_ANYWHERE_ARGS="--ssh-option StrictHostKeyChecking=no --ssh-option UserKnownHostsFile=/dev/null" \
-  scripts/deploy.sh dar-pve 127.0.0.1 "$work/hostkey" "$work/deploy.pub" \
-  || fail "deploy.sh failed"
+  timeout 25m scripts/deploy.sh dar-pve 127.0.0.1 "$work/hostkey" "$work/deploy.pub" \
+  || fail "deploy.sh failed or timed out"
 
 step "Wait for NixOS, trusting ONLY the pre-generated host key"
 # Strict checking against the committed public key: this connects only if

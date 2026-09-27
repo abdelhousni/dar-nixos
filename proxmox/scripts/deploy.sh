@@ -36,7 +36,11 @@ install -m 644 "$keydir/ssh_host_ed25519_key.pub" "$extra/etc/ssh/ssh_host_ed255
 install -d -m 700 "$extra/root/.ssh"
 install -m 600 "$authkeys" "$extra/root/.ssh/authorized_keys"
 
-args=(--flake ".#$host" --extra-files "$extra" --ssh-port "${SSH_PORT:-22}" --target-host "$user@$address")
+# nixos-anywhere reconnects after the kexec with --post-kexec-ssh-port, which
+# defaults to 22 whatever --ssh-port says. Behind a port forward (as in
+# ci/e2e-qemu.sh) the installer is on the same forwarded port, so pass it too.
+args=(--flake ".#$host" --extra-files "$extra" --target-host "$user@$address"
+  --ssh-port "${SSH_PORT:-22}" --post-kexec-ssh-port "${SSH_PORT:-22}")
 [[ -n "${SSH_KEY:-}" ]] && args+=(-i "$SSH_KEY")
 [[ -n "${KEXEC_TARBALL:-}" ]] && args+=(--kexec "$KEXEC_TARBALL")
 # shellcheck disable=SC2206 # intentional word splitting of extra flags

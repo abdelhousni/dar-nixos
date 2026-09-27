@@ -87,4 +87,4 @@ Only do this on a test machine. It replaces your configuration.
 
 ## Not here on purpose
 
-At the root, flakes, home-manager, secrets and multiple hosts are left out; `proxmox/` adds a flake and secrets on top of the same configuration. Each one is worth learning, but only after the basic loop is familiar: edit, rebuild, and roll back.
+At the root, flakes, home-manager, secrets and multiple hosts are left out. Each one is worth learning, but only after the basic loop is familiar: edit, rebuild, and roll back. [`proxmox/`](proxmox) is the next step: it adds a flake and secrets on top of the same configuration.
