@@ -14,6 +14,8 @@ A deliberately small NixOS machine, described in one file. It's the companion re
 | [`test.nix`](test.nix) | A NixOS VM test that boots `configuration.nix` and checks what the TILs claim about it. |
 | [`.github/workflows/check.yml`](.github/workflows/check.yml) | Runs both on GitHub Actions, on every push. |
 | [`.gitlab-ci.yml`](.gitlab-ci.yml) | The same two jobs for a self-managed GitLab CE runner. |
+| [`.github/workflows/security.yml`](.github/workflows/security.yml) | gitleaks over the whole Git history, and actionlint + zizmor over the workflows. On every push and weekly. |
+| [`.gitleaks.toml`](.gitleaks.toml) | gitleaks' default rules, with a single allowlisted file: a CI-only test key. |
 | [`proxmox/`](proxmox) | The same machine on Proxmox: OpenTofu creates a skeleton VM, nixos-anywhere installs NixOS from a flake, sops-nix brings the secrets. A flake of its own; see its README. |
 
 It targets **NixOS 26.05** and uses plain `configuration.nix` with channels, not flakes, to match the TIL.

@@ -1,0 +1,7 @@
+# gitleaks: the default rules, plus exactly one exception.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "CI-only SSH host key, committed on purpose: it decrypts nothing but the dummy proxmox/secrets/demo.yaml (see proxmox/README.md). Never allow a directory, only this file."
+paths = ['''^proxmox/ci/test-host-key$''']
