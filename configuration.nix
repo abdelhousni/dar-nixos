@@ -12,7 +12,9 @@
   # installer, specific to one machine, so it isn't committed here. The VM
   # build doesn't need it; it brings its own virtual disk.
   imports =
-    [ ./zsh.nix ] # Zsh + Oh My Zsh, see zsh.nix
+    [ ./zsh.nix   # Zsh + Oh My Zsh, see zsh.nix
+      ./ccbox.nix # coding agents in rootless Podman, see ccbox.nix
+    ]
     ++ (if builtins.pathExists ./hardware-configuration.nix
         then [ ./hardware-configuration.nix ]
         else [ ]);
