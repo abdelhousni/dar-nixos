@@ -37,3 +37,18 @@ gc=$(grep -n "^alias -- gc=" <<<"$zshrc" | cut -d: -f1)
 [[ -n "$omz" && -n "$gc" ]] || fail "expected both the Oh My Zsh source line and a gc alias"
 (( gc > omz )) || fail "the gc alias is set before Oh My Zsh loads, so the git plugin would win"
 echo "ok: the NixOS gc alias (line $gc) comes after Oh My Zsh (line $omz)"
+
+# 3. Home Manager reports a release mismatch with nixpkgs as a warning only:
+#    evaluation succeeds and nixos-rebuild prints it once. Fail on it here.
+warnings=$(nix-instantiate --eval --strict --json -E \
+  '(import <nixpkgs/nixos> { configuration = ./configuration.nix; }).config.warnings')
+if grep -q 'enableNixpkgsReleaseCheck' <<<"$warnings"; then
+  fail "Home Manager and nixpkgs are on different releases: $warnings"
+fi
+echo "ok: Home Manager and nixpkgs are on the same release"
+
+# 4. The user's git config is Home Manager's, with the identity it declares.
+gitconfig=$(nix-instantiate --eval --strict --raw -E \
+  '(import <nixpkgs/nixos> { configuration = ./configuration.nix; }).config.home-manager.users.demo.xdg.configFile."git/config".text')
+grep -q 'name = "Demo"' <<<"$gitconfig" || fail "~/.config/git/config has no user.name: $gitconfig"
+echo "ok: Home Manager writes the demo user's ~/.config/git/config"

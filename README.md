@@ -4,12 +4,14 @@ A deliberately small NixOS machine, described in one file. It's the companion re
 
 - [First steps on NixOS: the whole system is one file, and every change is a boot entry](https://abdelhousni.github.io/til/nixos/first-steps-configuration-generations-rollback.html)
 - [Oh My Zsh on NixOS: the plugin list installs nothing, and NixOS aliases win](https://abdelhousni.github.io/til/nixos/zsh-oh-my-zsh-declarative.html)
+- [Home Manager as a NixOS module: dotfiles in the same rebuild, and the file that's in the way](https://abdelhousni.github.io/til/nixos/home-manager-nixos-module.html)
 - [Testing a NixOS configuration on GitHub Actions](https://abdelhousni.github.io/til/nixos/nixos-config-tests-github-actions.html) and [on self-managed GitLab CE](https://abdelhousni.github.io/til/nixos/nixos-config-tests-gitlab-ce.html)
 
 | File | What it is |
 |---|---|
 | [`configuration.nix`](configuration.nix) | The whole machine: hostname, packages, SSH, a user, weekly garbage collection, `stateVersion`. Commented line by line. |
 | [`zsh.nix`](zsh.nix) | Zsh with Oh My Zsh, imported by `configuration.nix`. |
+| [`home.nix`](home.nix) | Home Manager as a NixOS module: the `demo` user's git config, a package and a dotfile, activated by `nixos-rebuild`. Imported by `configuration.nix`. |
 | [`ci/eval-checks.sh`](ci/eval-checks.sh) | Evaluation-only checks: builds nothing, needs no KVM. |
 | [`test.nix`](test.nix) | A NixOS VM test that boots `configuration.nix` and checks what the TILs claim about it. |
 | [`.github/workflows/check.yml`](.github/workflows/check.yml) | Runs both on GitHub Actions, on every push. |
@@ -43,7 +45,7 @@ Two levels. The first needs only Nix:
 NIX_PATH=nixpkgs=channel:nixos-26.05 ./ci/eval-checks.sh
 ```
 
-It evaluates the whole system (so NixOS assertions fire) and inspects the generated `/etc/zshrc`: no second `compinit`, a theme set, and the NixOS `gc` alias written after Oh My Zsh.
+It evaluates the whole system (so NixOS assertions fire) and inspects the generated `/etc/zshrc`: no second `compinit`, a theme set, and the NixOS `gc` alias written after Oh My Zsh. For `home.nix`, it fails if Home Manager and nixpkgs are on different releases (Home Manager itself only warns) and checks the generated git config.
 
 The second boots the machine in QEMU and needs KVM:
 
@@ -51,7 +53,7 @@ The second boots the machine in QEMU and needs KVM:
 nix-build test.nix -I nixpkgs=channel:nixos-26.05
 ```
 
-It asserts that sshd is running on port 22, `git` and `htop` are on the PATH, the hostname is set, the `nix-gc` timer exists, the running system is a Nix store path, and, for `zsh.nix`, that zsh is the login shell, `gc` is the NixOS alias, no Oh My Zsh plugin warns at startup, and `compinit` ran once. The test sets `qemu.forceAccel = true`, so without usable KVM it fails with a clear message instead of crawling along in software emulation.
+It asserts that sshd is running on port 22, `git` and `htop` are on the PATH, the hostname is set, the `nix-gc` timer exists, the running system is a Nix store path, and, for `zsh.nix`, that zsh is the login shell, `gc` is the NixOS alias, no Oh My Zsh plugin warns at startup, and `compinit` ran once. For `home.nix`, it checks that the `home-manager-demo` unit ran before logins were allowed, that managed files are store symlinks, that `rg` comes from `/etc/profiles/per-user/demo`, and that a file in the way of a managed one is backed up once, then blocks activation. The test sets `qemu.forceAccel = true`, so without usable KVM it fails with a clear message instead of crawling along in software emulation.
 
 To poke at the VM from a Python REPL instead:
 
@@ -67,7 +69,7 @@ Only do this on a test machine. It replaces your configuration.
 2. Copy the file in next to the `hardware-configuration.nix` the installer generated. `configuration.nix` imports that file automatically when it exists.
 
    ```sh
-   sudo cp configuration.nix zsh.nix /etc/nixos/
+   sudo cp configuration.nix zsh.nix home.nix /etc/nixos/
    ```
 3. Apply it without making it the boot default. If anything goes wrong, rebooting undoes it:
 
@@ -89,4 +91,4 @@ Only do this on a test machine. It replaces your configuration.
 
 ## Not here on purpose
 
-At the root, flakes, home-manager, secrets and multiple hosts are left out. Each one is worth learning, but only after the basic loop is familiar: edit, rebuild, and roll back. [`proxmox/`](proxmox) is the next step: it adds a flake and secrets on top of the same configuration.
+At the root, flakes, secrets and multiple hosts are left out. Each one is worth learning, but only after the basic loop is familiar: edit, rebuild, and roll back. [`proxmox/`](proxmox) is the next step: it adds a flake and secrets on top of the same configuration.
