@@ -3,7 +3,8 @@
 #
 # - eval runs on any runner: no build, no VM, no KVM.
 # - vm-test needs a runner that passes /dev/kvm into the job container, and
-#   is tagged `kvm` so it only lands there. See README.md for the runner side.
+#   is tagged `kvm` so it only lands there. For the runner side, see
+#   https://til.housni.eu/nixos/nixos-config-tests-gitlab-ce.html
 
 default:
   # The official image. Its bundled channel is nixpkgs-unstable, so NIX_PATH
@@ -25,6 +26,6 @@ vm-test:
   tags: [kvm]
   script:
     # Fail early with a clear message instead of in the middle of the build.
-    - test -e /dev/kvm || { echo "No /dev/kvm in this job container; see README.md"; exit 1; }
+    - test -e /dev/kvm || { echo "No /dev/kvm in this job container; see https://til.housni.eu/nixos/nixos-config-tests-gitlab-ce.html"; exit 1; }
     - nix --extra-experimental-features nix-command config show system-features
     - nix-build test.nix

@@ -2,10 +2,11 @@
 
 A deliberately small NixOS machine, described in one file. It's the companion repo for these TIL entries:
 
-- [First steps on NixOS: the whole system is one file, and every change is a boot entry](https://abdelhousni.github.io/til/nixos/first-steps-configuration-generations-rollback.html)
-- [Oh My Zsh on NixOS: the plugin list installs nothing, and NixOS aliases win](https://abdelhousni.github.io/til/nixos/zsh-oh-my-zsh-declarative.html)
-- [Home Manager as a NixOS module: dotfiles in the same rebuild, and the file that's in the way](https://abdelhousni.github.io/til/nixos/home-manager-nixos-module.html)
-- [Testing a NixOS configuration on GitHub Actions](https://abdelhousni.github.io/til/nixos/nixos-config-tests-github-actions.html) and [on self-managed GitLab CE](https://abdelhousni.github.io/til/nixos/nixos-config-tests-gitlab-ce.html)
+- [First steps on NixOS: the whole system is one file, and every change is a boot entry](https://til.housni.eu/nixos/first-steps-configuration-generations-rollback.html)
+- [Oh My Zsh on NixOS: the plugin list installs nothing, and NixOS aliases win](https://til.housni.eu/nixos/zsh-oh-my-zsh-declarative.html)
+- [Home Manager as a NixOS module: dotfiles in the same rebuild, and the file that's in the way](https://til.housni.eu/nixos/home-manager-nixos-module.html)
+- [Testing a NixOS configuration on GitHub Actions](https://til.housni.eu/nixos/nixos-config-tests-github-actions.html) and [on self-managed GitLab CE](https://til.housni.eu/nixos/nixos-config-tests-gitlab-ce.html)
+- [A Proxmox VM on demand, NixOS from Git: OpenTofu builds a skeleton, nixos-anywhere replaces it, and the host key exists before the VM](https://til.housni.eu/proxmox/nixos-on-demand-opentofu-nixos-anywhere-sops.html), for [`proxmox/`](proxmox)
 
 | File | What it is |
 |---|---|
@@ -15,9 +16,10 @@ A deliberately small NixOS machine, described in one file. It's the companion re
 | [`ci/eval-checks.sh`](ci/eval-checks.sh) | Evaluation-only checks: builds nothing, needs no KVM. |
 | [`test.nix`](test.nix) | A NixOS VM test that boots `configuration.nix` and checks what the TILs claim about it. |
 | [`.github/workflows/check.yml`](.github/workflows/check.yml) | Runs both on GitHub Actions, on every push. |
-| [`.gitlab-ci.yml`](.gitlab-ci.yml) | The same two jobs for a self-managed GitLab CE runner. |
+| [`.gitlab-ci.yml`](.gitlab-ci.yml) | The same two jobs for a self-managed GitLab CE runner. [The TIL](https://til.housni.eu/nixos/nixos-config-tests-gitlab-ce.html) covers preparing that runner. |
 | [`.github/workflows/security.yml`](.github/workflows/security.yml) | gitleaks over the whole Git history, and actionlint + zizmor over the workflows. On every push and weekly. |
 | [`.gitleaks.toml`](.gitleaks.toml) | gitleaks' default rules, with a single allowlisted file: a CI-only test key. |
+| [`CLAUDE.md`](CLAUDE.md) | Working rules for Claude Code sessions in this repo. |
 | [`proxmox/`](proxmox) | The same machine on Proxmox: OpenTofu creates a skeleton VM, nixos-anywhere installs NixOS from a flake, sops-nix brings the secrets. A flake of its own; see its README. |
 
 It targets **NixOS 26.05** and uses plain `configuration.nix` with channels, not flakes, to match the TIL.

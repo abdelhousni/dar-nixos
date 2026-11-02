@@ -1,6 +1,6 @@
 # dar-nixos: a minimal NixOS machine, described in one file.
 #
-# Companion to https://abdelhousni.github.io/til/nixos/first-steps-configuration-generations-rollback.html
+# Companion to https://til.housni.eu/nixos/first-steps-configuration-generations-rollback.html
 #
 # On a real machine this file lives at /etc/nixos/configuration.nix, next to
 # the hardware-configuration.nix that `nixos-generate-config` wrote for you.

@@ -1,6 +1,6 @@
 # Zsh with Oh My Zsh, set up the way the TIL recommends.
 #
-# Companion to https://abdelhousni.github.io/til/nixos/zsh-oh-my-zsh-declarative.html
+# Companion to https://til.housni.eu/nixos/zsh-oh-my-zsh-declarative.html
 # test.nix checks the behaviour described there; ci/eval-checks.sh checks the
 # generated /etc/zshrc without building anything.
 { pkgs, ... }:
