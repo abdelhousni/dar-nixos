@@ -39,10 +39,11 @@ of its own, with its own checks in [`proxmox/README.md`](proxmox/README.md).
 
 ## Stay vanilla (strongly recommended)
 
-Use the stock, upstream tool and its defaults before anything else: stock VS
-Code with extensions from each tool's own vendor only (no VS Code fork such as
-Cursor or Antigravity), project configuration in the repository
-(`.devcontainer/`, `.vscode/`) rather than on the workstation, `kubectl`
-before any cluster UI, Claude Code as the only AI assistant, and upstream
-tools, roles and collections used as published, unpatched. Depart from this
-only when the stock tool can't do the job, and say why in the pull request.
+This applies to every tool and framework: use the stock, upstream version and
+its defaults before anything else, as published and unpatched. Prefer what the
+upstream project or vendor ships over forks, wrappers and third-party add-ons,
+and keep project configuration in the repository rather than on the workstation.
+For example: stock VS Code with vendor extensions only (no fork such as Cursor
+or Antigravity), `kubectl` before any cluster UI, and Claude Code as the only AI
+assistant. Depart from this only when the stock tool can't do the job, and say
+why in the pull request.
