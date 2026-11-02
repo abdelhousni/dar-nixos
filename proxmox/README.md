@@ -8,6 +8,8 @@ The dar-nixos machine from [`../configuration.nix`](../configuration.nix) as a P
 
 This directory is a flake of its own, so the repo root keeps its channel-based setup. It pins nixpkgs `nixos-26.05`, disko and sops-nix through `git+https` URLs, which resolve without the GitHub API and work unchanged from a Git mirror.
 
+**Status:** CI runs this end to end on a Debian skeleton in QEMU/KVM, but it hasn't been run against a real Proxmox VE yet. [#4](https://github.com/abdelhousni/dar-nixos/issues/4) tracks that first run and its checklist.
+
 ## Prerequisites
 
 - **Proxmox VE 8.4 or later.** The provider docs note that earlier versions reject a `.qcow2` file name for downloaded images. On the storage that receives the image (default `local`), add **Import** to its content types: *Datacenter → Storage → Edit*.

@@ -1,7 +1,7 @@
 # Home Manager as a NixOS module: the demo user's dotfiles, built and
 # rolled back together with the system by `nixos-rebuild`.
 #
-# Companion to https://abdelhousni.github.io/til/nixos/home-manager-nixos-module.html
+# Companion to https://til.housni.eu/nixos/home-manager-nixos-module.html
 #
 # On a real machine the TIL uses a channel instead of the fetchTarball below:
 #
