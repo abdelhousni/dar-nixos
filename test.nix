@@ -28,6 +28,10 @@ pkgs.testers.runNixOSTest {
     machine.succeed("git --version")
     machine.succeed("htop --version")
 
+    # ghostty.terminfo: a login shell finds the xterm-ghostty entry that an
+    # SSH session from Ghostty asks for.
+    machine.succeed("su -l demo -c 'infocmp xterm-ghostty'")
+
     # The hostname came from the same file.
     machine.succeed("grep -qx dar-nixos /proc/sys/kernel/hostname")
 

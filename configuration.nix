@@ -32,6 +32,10 @@
   environment.systemPackages = with pkgs; [
     git
     htop
+    # Only Ghostty's terminfo, not the terminal itself (this machine has no
+    # desktop): an SSH session from Ghostty sets TERM=xterm-ghostty, and
+    # without this entry htop, clear and the like don't know that terminal.
+    ghostty.terminfo
   ];
 
   # A service is a module, not just a package: this writes the systemd unit,

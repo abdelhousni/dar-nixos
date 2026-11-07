@@ -55,7 +55,7 @@ The second boots the machine in QEMU and needs KVM:
 nix-build test.nix -I nixpkgs=channel:nixos-26.05
 ```
 
-It asserts that sshd is running on port 22, `git` and `htop` are on the PATH, the hostname is set, the `nix-gc` timer exists, the running system is a Nix store path, and, for `zsh.nix`, that zsh is the login shell, `gc` is the NixOS alias, no Oh My Zsh plugin warns at startup, and `compinit` ran once. For `home.nix`, it checks that the `home-manager-demo` unit ran before logins were allowed, that managed files are store symlinks, that `rg` comes from `/etc/profiles/per-user/demo`, and that a file in the way of a managed one is backed up once, then blocks activation. The test sets `qemu.forceAccel = true`, so without usable KVM it fails with a clear message instead of crawling along in software emulation.
+It asserts that sshd is running on port 22, `git` and `htop` are on the PATH, the `xterm-ghostty` terminfo entry is installed (so SSH from [Ghostty](https://ghostty.org/) works), the hostname is set, the `nix-gc` timer exists, the running system is a Nix store path, and, for `zsh.nix`, that zsh is the login shell, `gc` is the NixOS alias, no Oh My Zsh plugin warns at startup, and `compinit` ran once. For `home.nix`, it checks that the `home-manager-demo` unit ran before logins were allowed, that managed files are store symlinks, that `rg` comes from `/etc/profiles/per-user/demo`, and that a file in the way of a managed one is backed up once, then blocks activation. The test sets `qemu.forceAccel = true`, so without usable KVM it fails with a clear message instead of crawling along in software emulation.
 
 To poke at the VM from a Python REPL instead:
 
