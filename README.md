@@ -21,6 +21,8 @@ A deliberately small NixOS machine, described in one file. It's the companion re
 | [`.gitleaks.toml`](.gitleaks.toml) | gitleaks' default rules, with a single allowlisted file: a CI-only test key. |
 | [`CLAUDE.md`](CLAUDE.md) | Working rules for Claude Code sessions in this repo. |
 | [`proxmox/`](proxmox) | The same machine on Proxmox: OpenTofu creates a skeleton VM, nixos-anywhere installs NixOS from a flake, sops-nix brings the secrets. A flake of its own; see its README. |
+| [`wsl/`](wsl) | The same machine as a WSL2 distribution with NixOS-WSL, with the Ghostty terminal on the Windows desktop through WSLg. A flake of its own; see its README. |
+| [`.github/workflows/wsl.yml`](.github/workflows/wsl.yml) | Builds the WSL distribution file on Linux, then imports and checks it in real WSL2 on a Windows runner. |
 
 It targets **NixOS 26.05** and uses plain `configuration.nix` with channels, not flakes, to match the TIL.
 
@@ -93,4 +95,4 @@ Only do this on a test machine. It replaces your configuration.
 
 ## Not here on purpose
 
-At the root, flakes, secrets and multiple hosts are left out. Each one is worth learning, but only after the basic loop is familiar: edit, rebuild, and roll back. [`proxmox/`](proxmox) is the next step: it adds a flake and secrets on top of the same configuration.
+At the root, flakes, secrets and multiple hosts are left out. Each one is worth learning, but only after the basic loop is familiar: edit, rebuild, and roll back. [`proxmox/`](proxmox) is the next step: it adds a flake and secrets on top of the same configuration. [`wsl/`](wsl) adds a flake too, to run the same machine on Windows.

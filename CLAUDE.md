@@ -21,6 +21,8 @@ podman run --rm -v "$PWD":/w:ro,Z -w /w -e NIX_PATH=nixpkgs=channel:nixos-26.05 
 
 Without KVM, say the VM test didn't run and let CI run it. `proxmox/` is a flake
 of its own, with its own checks in [`proxmox/README.md`](proxmox/README.md).
+So is `wsl/` ([`wsl/README.md`](wsl/README.md)); its boot checks need Windows
+with WSL2, so they run only in CI.
 
 ## Rules
 

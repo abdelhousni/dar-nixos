@@ -1,0 +1,3 @@
+# The wsl workflow checks this repo out on Windows, where Git would otherwise
+# turn scripts into CRLF and bash would choke on them inside WSL.
+*.sh text eol=lf

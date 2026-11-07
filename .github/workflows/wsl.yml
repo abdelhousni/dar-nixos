@@ -1,0 +1,58 @@
+name: wsl
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  # Builds dar-wsl.wsl on Linux: nixos-install into a directory, then a
+  # tarball. The builder needs root, not KVM.
+  tarball:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wsl
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          enable_kvm: false
+          extra_nix_config: experimental-features = nix-command flakes
+      - name: Build the tarball builder
+        run: nix build .#tarballBuilder
+      - name: Build dar-wsl.wsl
+        run: sudo ./result/bin/nixos-wsl-tarball-builder dar-wsl.wsl
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dar-wsl
+          path: wsl/dar-wsl.wsl
+          if-no-files-found: error
+          retention-days: 3
+
+  # Imports it into real WSL2 on a Windows runner (nested virtualisation,
+  # x86_64 only), boots it, and runs wsl/ci/checks.sh inside as demo.
+  # One command per step: a pwsh step only fails on its last exit code.
+  wsl:
+    needs: tarball
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dar-wsl
+      - name: Update WSL
+        run: wsl --update
+      - name: Show the WSL version
+        run: wsl --version
+      - name: Import dar-wsl.wsl
+        run: wsl --import dar-wsl "$env:RUNNER_TEMP\dar-wsl" dar-wsl.wsl --version 2
+      - name: Boot it and run the checks
+        run: wsl -d dar-wsl --cd "$env:GITHUB_WORKSPACE" -- bash wsl/ci/checks.sh
